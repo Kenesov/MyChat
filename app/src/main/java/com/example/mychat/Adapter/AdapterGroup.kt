@@ -1,40 +1,59 @@
 package com.example.mychat.Adapter
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.mychat.Data.Group
 import com.example.mychat.R
 import com.example.mychat.databinding.ItemGruopBinding
+import com.google.firebase.firestore.auth.User
 
-class AdapterGroup: RecyclerView.Adapter<AdapterGroup.ViewHolder>() {
+class AdapterGroup: ListAdapter<Group, AdapterGroup.GroupViewHolder>(diffUtilCallBack) {
 
-    var models = listOf<Group>()
-    @SuppressLint("NotifyDataSetChanged")
-    set(value) {
-        field = value
-        notifyDataSetChanged()
-    }
+    inner class GroupViewHolder(private val binding: ItemGruopBinding): ViewHolder(binding.root){
 
-    inner class ViewHolder(private val binding: ItemGruopBinding): RecyclerView.ViewHolder(binding.root){
+        fun bind(){
 
-        fun bind(group: Group){
+            val d = getItem(adapterPosition)
+
+            binding.apply {
+                contactName.text = d.name
+
+                contactName.setOnClickListener {
+                    onItemClick.invoke(d.id.toString())
+                }
+            }
 
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_gruop, parent, false)
-        val binding = ItemGruopBinding.bind(view)
-        return ViewHolder(binding)
+    private object diffUtilCallBack: DiffUtil.ItemCallback<Group>() {
+        override fun areItemsTheSame(oldItem: Group, newItem: Group): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Group, newItem: Group): Boolean {
+            return  oldItem == newItem
+        }
+
+
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(models[position])
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupViewHolder {
+        return GroupViewHolder(
+            ItemGruopBinding.bind(LayoutInflater.from(parent.context).inflate(R.layout.item_gruop, parent, false))
+        )
     }
 
-    override fun getItemCount(): Int {
-      return models.size
+    private var onItemClick: (id: String) -> Unit = {}
+    fun setOnItemClickListener(onItemClick: (id: String) -> Unit) {
+        this.onItemClick = onItemClick
     }
+
+    override fun onBindViewHolder(holder: GroupViewHolder, position: Int) {
+        holder.bind()
+    }
+
 }

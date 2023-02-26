@@ -1,6 +1,6 @@
 package com.example.mychat.Data
 
 data class Group(
-    val image: Int,
+    val id: String,
     val name: String
 )
